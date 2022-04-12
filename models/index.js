@@ -1,7 +1,6 @@
-const dbConfig = require("../config/dbConfig.js");
-console.log("dbConfig", dbConfig);
-
 const { Sequelize, DataTypes } = require("sequelize");
+
+const dbConfig = require("../config/dbConfig.js");
 
 const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
   host: dbConfig.HOST,
@@ -32,11 +31,12 @@ db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
 db.questions = require("./questionModel.js")(sequelize, DataTypes);
+db.users = require("./userModel.js")(sequelize, DataTypes);
 
 // db.reviews = require("./reviewModel.js")(sequelize, DataTypes);
 
 db.sequelize.sync({ force: false }).then(() => {
-  console.log("yes re-sync done!");
+  console.log("Re-sync done!");
 });
 
 module.exports = db;

@@ -1,82 +1,83 @@
 const db = require("../models");
 
-// image Upload
-
-// create main Model
 const Question = db.questions;
 
-// main work
-
-// 2. get all products
-
 const getAllQuestions = async (req, res) => {
-  let products = await Question.findAll({});
-  res.status(200).send({ products, totalQuestions: products.length });
+  let questions = await Question.findAll({});
+  res.status(200).send({ questions, totalQuestions: questions.length });
 };
 
-// 3. get single product
+const createQuestion = async (req, res) => {
+  const newQuestion = {
+    question: req.body.question,
+    answer1: req.body.answer1,
+    answer2: req.body.answer2,
+    answer3: req.body.answer3,
+    answer4: req.body.answer4,
+    correctAnswer: req.body.correctAnswer,
+  };
 
-const getOneProduct = async (req, res) => {
-  let id = req.params.id;
-  let product = await Product.findOne({ where: { id: id } });
-  res.status(200).send(product);
+  const newQues = await Question.create(newQuestion);
+  res.status(200).send({ newQues, msg: "Created a new question successfully" });
 };
 
-// 4. update Product
-
-const updateProduct = async (req, res) => {
-  let id = req.params.id;
-
-  const product = await Product.update(req.body, { where: { id: id } });
-
-  res.status(200).send(product);
+const getOneQuestion = async (req, res) => {
+  const id = req.params.id;
+  const OneQuestion = await Question.findOne({ where: { id: id } });
+  res.status(200).send(OneQuestion);
 };
 
-// 5. delete product by id
-
-const deleteProduct = async (req, res) => {
-  let id = req.params.id;
-
-  await Product.destroy({ where: { id: id } });
-
-  res.status(200).send("Product is deleted !");
-};
-
-// 6. get published product
-
-const getPublishedProduct = async (req, res) => {
-  const products = await Product.findAll({ where: { published: true } });
-
-  res.status(200).send(products);
-};
-
-// 7. connect one to many relation Product and Reviews
-
-const getProductReviews = async (req, res) => {
+const deleteQuestion = async (req, res) => {
   const id = req.params.id;
 
-  const data = await Product.findOne({
-    include: [
-      {
-        model: Review,
-        as: "review",
-      },
-    ],
-    where: { id: id },
-  });
+  await Question.destroy({ where: { id: id } });
 
-  res.status(200).send(data);
+  res.status(200).send({ msg: "question is deleted" });
 };
 
-// 8. Upload Image Controller
+const updateQuestion = async (req, res) => {
+  const id = req.params.id;
+
+  const question = await Question.update(req.body, { where: { id: id } });
+
+  res.status(200).send({ msg: "Question has been updated successfully" });
+};
+
+const submitAnswer = async (req, res) => {
+  const userAnswers = req.body;
+  let mark = 0;
+
+  const correctAnswers = await Promise.all(
+    userAnswers.map((userAnswer) => {
+      const answerId = userAnswer.id;
+      const trueAnswer = Question.findOne({
+        where: { id: answerId },
+      });
+      return trueAnswer;
+    })
+  );
+
+  correctAnswers.forEach((correctAnswer, idx) => {
+    if (correctAnswer.correctAnswer === userAnswers[idx].userAnswer) {
+      mark++;
+      userAnswers[idx].result = true;
+    } else {
+      userAnswers[idx].result = false;
+    }
+  });
+
+  res.status(200).send({
+    userAnswers,
+    mark,
+    totalAnsweredQuestion: userAnswers.length,
+  });
+};
 
 module.exports = {
-  //   addProduct,
+  createQuestion,
   getAllQuestions,
-  //   getOneProduct,
-  //   updateProduct,
-  //   deleteProduct,
-  //   getPublishedProduct,
-  //   getProductReviews,
-  //   upload,
+  getOneQuestion,
+  deleteQuestion,
+  updateQuestion,
+  submitAnswer,
 };
