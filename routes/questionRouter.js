@@ -1,4 +1,3 @@
-// import controllers review, products
 const questionController = require("../controllers/questionController.js");
 const {
   authenticateUser,
