@@ -16,8 +16,12 @@ const router = require("express").Router();
 // use routers
 
 router.get("/", authenticateAdmin, userController.getAllUsers);
-router.post("/", userController.createUser);
+router.post("/", validate(creatingUserSchema), userController.createUser);
 router.post("/login", validate(logginInSchema), userController.login);
-router.post("/refreshToken", userController.refreshToken);
+router.post(
+  "/refreshToken",
+  validate(refreshingTokenSchema),
+  userController.refreshToken
+);
 
 module.exports = router;
